@@ -8,7 +8,7 @@ ros::Publisher pub_cmd_vel;
 
 void callback_laser(const sensor_msgs::LaserScan::ConstPtr& msg){
 
-	if(msg->ranges[msg->ranges.size()/2] <= 5){
+	if(msg->ranges[msg->ranges.size()/2] <= 2){
 		//cmd_vel.angular.z = 5;
 		for(int i = 0; i < 4; i++){
 			pub_cmd_vel.publish(cmd_vel);
