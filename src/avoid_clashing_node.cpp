@@ -9,7 +9,7 @@ bool obstacle = false;
 
 void callback_laser(const sensor_msgs::LaserScan::ConstPtr& laser_msg){
 
-	if(laser_msg->ranges[laser_msg->ranges.size()/2] <= 2) obstacle = true;
+	if(laser_msg->ranges[laser_msg->ranges.size()/2] <= 0.5) obstacle = true;
 	else obstacle = false;
 }
 
