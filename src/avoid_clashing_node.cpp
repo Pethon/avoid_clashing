@@ -1,4 +1,4 @@
-#define DISTANCE 1.5f
+#define DISTANCE 0.8f
 
 #include <unistd.h>
 #include <ros/ros.h>
