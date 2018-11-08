@@ -16,7 +16,7 @@ double stop_time;
 double now_time;
 
 void callback_goal(const move_base_msgs::MoveBaseActionGoal::ConstPtr& goal){
-	
+
 	next_goal.goal.target_pose.pose.position.x = goal->goal.target_pose.pose.position.x;
 	next_goal.goal.target_pose.pose.position.y = goal->goal.target_pose.pose.position.y;
 	next_goal.goal.target_pose.pose.position.z = goal->goal.target_pose.pose.position.z;
@@ -24,6 +24,8 @@ void callback_goal(const move_base_msgs::MoveBaseActionGoal::ConstPtr& goal){
 	next_goal.goal.target_pose.pose.orientation.x = goal->goal.target_pose.pose.orientation.x;
 	next_goal.goal.target_pose.pose.orientation.y = goal->goal.target_pose.pose.orientation.y;
 	next_goal.goal.target_pose.pose.orientation.z = goal->goal.target_pose.pose.orientation.z;
+
+	ROS_INFO("goal subscribed");
 
 }
 
@@ -38,6 +40,7 @@ void callback_laser(const sensor_msgs::LaserScan::ConstPtr& laser_msg){
 	else{
 		if(obstacle == true){
 			pub_goal.publish(next_goal);
+			ROS_INFO("goal published");
 		}
 		obstacle = false;
 	}
