@@ -8,7 +8,7 @@
 
 geometry_msgs::Twist cmd_vel_stop;
 geometry_msgs::Twist cmd_vel_back;
-geometry_msgs::PoseStamped current_goal;
+geometry_msgs::PoseStamped next_goal;
 ros::Publisher pub_cmd_vel;
 ros::Publisher pub_goal;
 bool obstacle = false;
@@ -16,7 +16,9 @@ double stop_time;
 double now_time;
 
 void callback_goal(const geometry_msgs::PoseStamped& goal){
-	current_goal = goal;
+
+	next_goal = goal;
+	
 }
 
 void callback_laser(const sensor_msgs::LaserScan::ConstPtr& laser_msg){
@@ -29,7 +31,7 @@ void callback_laser(const sensor_msgs::LaserScan::ConstPtr& laser_msg){
 	}
 	else{
 		if(obstacle == true){
-			pub_goal.publish(current_goal);
+			pub_goal.publish(next_goal);
 		}
 		obstacle = false;
 	}
@@ -62,10 +64,10 @@ int main(int argc, char **argv){
 
 	ros::Subscriber sub_laser = n.subscribe("/scan", 1, callback_laser);
 	ros::Subscriber sub_move_base = n.subscribe("/cmd_vel_from_move_base", 1, callback_move_base);
-	ros::Subscriber sub_goal = n.subscribe("/move_base/current_goal", 1, callback_goal);
+	ros::Subscriber sub_goal = n.subscribe("/move_base/goal", 1, callback_goal);
 
 	pub_cmd_vel = n.advertise<geometry_msgs::Twist>("/icart_mini/cmd_vel", 1);
-	pub_goal = n.advertise<geometry_msgs::PoseStamped>("/move_base/current_goal", 1);
+	pub_goal = n.advertise<geometry_msgs::PoseStamped>("/move_base/goal", 1);
 
 	ros::spin();
 }
