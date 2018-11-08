@@ -4,21 +4,27 @@
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
 #include <geometry_msgs/Twist.h>
-#include <geometry_msgs/PoseStamped.h>
+#include <move_base_msgs/MoveBaseActionGoal.h>
 
 geometry_msgs::Twist cmd_vel_stop;
 geometry_msgs::Twist cmd_vel_back;
-geometry_msgs::PoseStamped next_goal;
+move_base_msgs::MoveBaseActionGoal next_goal;
 ros::Publisher pub_cmd_vel;
 ros::Publisher pub_goal;
 bool obstacle = false;
 double stop_time;
 double now_time;
 
-void callback_goal(const geometry_msgs::PoseStamped& goal){
-
-	next_goal = goal;
+void callback_goal(const move_base_msgs::MoveBaseActionGoal::ConstPtr& goal){
 	
+	next_goal.goal.target_pose.pose.position.x = goal->goal.target_pose.pose.position.x;
+	next_goal.goal.target_pose.pose.position.y = goal->goal.target_pose.pose.position.y;
+	next_goal.goal.target_pose.pose.position.z = goal->goal.target_pose.pose.position.z;
+
+	next_goal.goal.target_pose.pose.orientation.x = goal->goal.target_pose.pose.orientation.x;
+	next_goal.goal.target_pose.pose.orientation.y = goal->goal.target_pose.pose.orientation.y;
+	next_goal.goal.target_pose.pose.orientation.z = goal->goal.target_pose.pose.orientation.z;
+
 }
 
 void callback_laser(const sensor_msgs::LaserScan::ConstPtr& laser_msg){
@@ -67,7 +73,7 @@ int main(int argc, char **argv){
 	ros::Subscriber sub_goal = n.subscribe("/move_base/goal", 1, callback_goal);
 
 	pub_cmd_vel = n.advertise<geometry_msgs::Twist>("/icart_mini/cmd_vel", 1);
-	pub_goal = n.advertise<geometry_msgs::PoseStamped>("/move_base/goal", 1);
+	pub_goal = n.advertise<move_base_msgs::MoveBaseActionGoal>("/move_base/goal", 1);
 
 	ros::spin();
 }
