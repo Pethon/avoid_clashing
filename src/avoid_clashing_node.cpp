@@ -23,6 +23,10 @@ void callback_goal(const move_base_msgs::MoveBaseActionGoal::ConstPtr& goal){
 	next_goal.goal_id.stamp = goal->goal_id.stamp;
 	next_goal.goal_id.id = goal->goal_id.id;
 
+	next_goal.goal.target_pose.header.seq = goal->goal.target_pose.header.seq;
+	next_goal.goal.target_pose.header.stamp = goal->goal.target_pose.header.stamp;
+	next_goal.goal.target_pose.header.frame_id = goal->goal.target_pose.header.frame_id;
+
 	next_goal.goal.target_pose.pose.position.x = goal->goal.target_pose.pose.position.x;
 	next_goal.goal.target_pose.pose.position.y = goal->goal.target_pose.pose.position.y;
 	next_goal.goal.target_pose.pose.position.z = goal->goal.target_pose.pose.position.z;
@@ -30,6 +34,7 @@ void callback_goal(const move_base_msgs::MoveBaseActionGoal::ConstPtr& goal){
 	next_goal.goal.target_pose.pose.orientation.x = goal->goal.target_pose.pose.orientation.x;
 	next_goal.goal.target_pose.pose.orientation.y = goal->goal.target_pose.pose.orientation.y;
 	next_goal.goal.target_pose.pose.orientation.z = goal->goal.target_pose.pose.orientation.z;
+	next_goal.goal.target_pose.pose.orientation.w = goal->goal.target_pose.pose.orientation.w;
 
 	ROS_INFO("goal subscribed");
 
