@@ -47,6 +47,7 @@ void callback_laser(const sensor_msgs::LaserScan::ConstPtr& laser_msg){
 			stop_time = ros::Time::now().toSec();
 		}
 		obstacle = true;
+		ROS_INFO("obstacle = true");
 	}
 	else{
 		if(obstacle == true){
@@ -54,6 +55,7 @@ void callback_laser(const sensor_msgs::LaserScan::ConstPtr& laser_msg){
 			ROS_INFO("goal published");
 		}
 		obstacle = false;
+		ROS_INFO("obstacle = false");
 	}
 }
 
