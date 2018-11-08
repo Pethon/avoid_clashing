@@ -17,6 +17,12 @@ double now_time;
 
 void callback_goal(const move_base_msgs::MoveBaseActionGoal::ConstPtr& goal){
 
+	next_goal.header.seq = goal->header.seq;
+	next_goal.header.stamp = goal->header.stamp;
+	next_goal.header.frame_id = goal->header.frame_id;
+	next_goal.goal_id.stamp = goal->goal_id.stamp;
+	next_goal.goal_id.id = goal->goal_id.id;
+
 	next_goal.goal.target_pose.pose.position.x = goal->goal.target_pose.pose.position.x;
 	next_goal.goal.target_pose.pose.position.y = goal->goal.target_pose.pose.position.y;
 	next_goal.goal.target_pose.pose.position.z = goal->goal.target_pose.pose.position.z;
