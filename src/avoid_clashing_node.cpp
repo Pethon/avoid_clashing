@@ -1,5 +1,5 @@
 #define FRONT_DISTANCE 0.8f
-#define BACK_DISTANCE 0.4f
+#define BACK_DISTANCE 0.6f
 
 #include <unistd.h>
 #include <ros/ros.h>
@@ -54,12 +54,12 @@ void callback_laser(const sensor_msgs::LaserScan::ConstPtr& laser_msg){
 		}
 	}
 	//check back scan
-	for(int i = 0; i < 60; i++){
+	for(int i = 0; i < 70; i++){
 		if(laser_msg->ranges[i] <= BACK_DISTANCE){
 			back_obstacle_check = true;
 		}
 	}
-	for(int i = laser_msg->ranges.size()-60; i < laser_msg->ranges.size(); i++){
+	for(int i = laser_msg->ranges.size()-70; i < laser_msg->ranges.size(); i++){
 		if(laser_msg->ranges[i] <= BACK_DISTANCE){
 			back_obstacle_check = true;
 		}
