@@ -1,4 +1,5 @@
-#define DISTANCE 0.8f
+#define FRONT_DISTANCE 0.8f
+#define BACK_DISTANCE 0.4f
 
 #include <unistd.h>
 #include <ros/ros.h>
@@ -12,6 +13,7 @@ move_base_msgs::MoveBaseActionGoal next_goal;
 ros::Publisher pub_cmd_vel;
 ros::Publisher pub_goal;
 bool obstacle = false;
+bool can_move_back = true;
 double stop_time;
 double now_time;
 
@@ -42,7 +44,28 @@ void callback_goal(const move_base_msgs::MoveBaseActionGoal::ConstPtr& goal){
 
 void callback_laser(const sensor_msgs::LaserScan::ConstPtr& laser_msg){
 
-	if(laser_msg->ranges[laser_msg->ranges.size()/2] <= DISTANCE){
+	bool front_obstacle_check = false;
+	bool back_obstacle_check = false;
+
+	//check front scan
+	for(int i = 480; i < laser_msg->ranges.size()-480; i++){
+		if(laser_msg->ranges[i] <= FRONT_DISTANCE){
+			front_obstacle_check = true;
+		}
+	}
+	//check back scan
+	for(int i = 0; i < 60; i++){
+		if(laser_msg->ranges[i] <= BACK_DISTANCE){
+			back_obstacle_check = true;
+		}
+	}
+	for(int i = laser_msg->ranges.size()-60; i < laser_msg->ranges.size(); i++){
+		if(laser_msg->ranges[i] <= BACK_DISTANCE){
+			back_obstacle_check = true;
+		}
+	}
+
+	if (front_obstacle_check == true){
 		if(obstacle == false){
 			stop_time = ros::Time::now().toSec();
 		}
@@ -57,6 +80,13 @@ void callback_laser(const sensor_msgs::LaserScan::ConstPtr& laser_msg){
 		obstacle = false;
 		ROS_INFO("obstacle = false");
 	}
+
+	if(back_obstacle_check == true){
+		can_move_back = false;
+	}
+	else{
+		can_move_back = true;
+	}
 }
 
 void callback_move_base(const geometry_msgs::Twist::ConstPtr& cmd_vel_from_move_base){
@@ -65,12 +95,16 @@ void callback_move_base(const geometry_msgs::Twist::ConstPtr& cmd_vel_from_move_
 		now_time = ros::Time::now().toSec();
 		if(now_time - stop_time < 3){
 			pub_cmd_vel.publish(cmd_vel_stop);
-			ROS_ERROR("OBSTACLE DETECTED!!");
+			ROS_ERROR("STOP!!");
 		}
-		else if(now_time - stop_time < 15){
+		else if(can_move_back && now_time - stop_time < 15){
 			cmd_vel_back.linear.x = -0.1;
 			pub_cmd_vel.publish(cmd_vel_back);
 			ROS_INFO("MOVE BACK!!");
+		}
+		else{
+			pub_cmd_vel.publish(cmd_vel_stop);
+			ROS_ERROR("CAN'T MOVE BACK!!");
 		}
 	}
 	else{
