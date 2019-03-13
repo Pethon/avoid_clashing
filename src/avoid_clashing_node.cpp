@@ -1,4 +1,5 @@
-#define DISTANCE 0.8f
+#define FRONT_DISTANCE 0.8f
+#define BACK_DISTANCE 1.0f
 
 #include <unistd.h>
 #include <ros/ros.h>
@@ -7,13 +8,15 @@
 #include <move_base_msgs/MoveBaseActionGoal.h>
 
 geometry_msgs::Twist cmd_vel_stop;
-geometry_msgs::Twist cmd_vel_back;
+geometry_msgs::Twist cmd_vel;
 move_base_msgs::MoveBaseActionGoal next_goal;
 ros::Publisher pub_cmd_vel;
 ros::Publisher pub_goal;
 bool obstacle = false;
+bool can_move_back = true;
 double stop_time;
 double now_time;
+int move_back_step_count;
 
 void callback_goal(const move_base_msgs::MoveBaseActionGoal::ConstPtr& goal){
 
@@ -42,12 +45,34 @@ void callback_goal(const move_base_msgs::MoveBaseActionGoal::ConstPtr& goal){
 
 void callback_laser(const sensor_msgs::LaserScan::ConstPtr& laser_msg){
 
-	if(laser_msg->ranges[laser_msg->ranges.size()/2] <= DISTANCE){
+	bool front_obstacle_check = false;
+	bool back_obstacle_check = false;
+
+	//check front scan
+	for(int i = 480; i < laser_msg->ranges.size()-480; i++){
+		if(laser_msg->ranges[i] <= FRONT_DISTANCE){
+			front_obstacle_check = true;
+		}
+	}
+	//check back scan
+	for(int i = 0; i < 70; i++){
+		if(laser_msg->ranges[i] <= BACK_DISTANCE){
+			back_obstacle_check = true;
+		}
+	}
+	for(int i = laser_msg->ranges.size()-70; i < laser_msg->ranges.size(); i++){
+		if(laser_msg->ranges[i] <= BACK_DISTANCE){
+			back_obstacle_check = true;
+		}
+	}
+
+	if (front_obstacle_check == true){
 		if(obstacle == false){
 			stop_time = ros::Time::now().toSec();
+			move_back_step_count = 0;
 		}
 		obstacle = true;
-		ROS_INFO("obstacle = true");
+		ROS_INFO("front obstacle = true");
 	}
 	else{
 		if(obstacle == true){
@@ -55,7 +80,16 @@ void callback_laser(const sensor_msgs::LaserScan::ConstPtr& laser_msg){
 			ROS_INFO("goal published");
 		}
 		obstacle = false;
-		ROS_INFO("obstacle = false");
+		ROS_INFO("front obstacle = false");
+	}
+
+	if(back_obstacle_check == true){
+		can_move_back = false;
+		ROS_INFO("back obstacle = true");
+	}
+	else{
+		can_move_back = true;
+		ROS_INFO("back obstacle = false");
 	}
 }
 
@@ -65,12 +99,23 @@ void callback_move_base(const geometry_msgs::Twist::ConstPtr& cmd_vel_from_move_
 		now_time = ros::Time::now().toSec();
 		if(now_time - stop_time < 3){
 			pub_cmd_vel.publish(cmd_vel_stop);
-			ROS_ERROR("OBSTACLE DETECTED!!");
+			ROS_ERROR("STOP!!");
 		}
-		else if(now_time - stop_time < 15){
-			cmd_vel_back.linear.x = -0.1;
-			pub_cmd_vel.publish(cmd_vel_back);
+		else if(can_move_back){
+			cmd_vel.linear.x = -0.1;
+			cmd_vel.angular.z = 0.0;
+			pub_cmd_vel.publish(cmd_vel);
 			ROS_INFO("MOVE BACK!!");
+		}
+		else if(now_time - stop_time < 180){
+			pub_cmd_vel.publish(cmd_vel_stop);
+			ROS_ERROR("CAN'T MOVE BACK!!");
+		}
+		else{
+			cmd_vel.linear.x = 0.0;
+			cmd_vel.angular.z = 0.2;
+			pub_cmd_vel.publish(cmd_vel);
+			ROS_INFO("START ROTATING!!");
 		}
 	}
 	else{
