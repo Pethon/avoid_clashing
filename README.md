@@ -1,7 +1,7 @@
 # avoid_clashing
 
 ## 必要なリポシトリー
-1. [orne_navigation](https://github.com/open-rdc/orne_navigation)
+1. [orne_navigationのfix_scan__#337ブランチ](https://github.com/open-rdc/orne_navigation/tree/fix_scan__%23337)
 2. [ira_laser_tools](https://github.com/iralabdisco/ira_laser_tools)
 
 ## ira_laser_toolsについて
